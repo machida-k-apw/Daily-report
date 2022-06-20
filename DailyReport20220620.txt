@@ -1,0 +1,306 @@
+作業内容
+・JavaScriptチュートリアル
+　開始：オブジェクト：シンボル型
+　終了：データ型-配列のメソッド-indexOf/lastIndexOf and includes
+以下本日の学習内容
+
+#オブジェクト：基本
+##シンボル型
+・JavaScriptではシンボルはユニークであり、同じ説明のシンボルを複数作成しても、それらは異なる値になる
+
+・シンボルは文字列への暗黙の変換を行わない
+　そのため、明示的にtoString()メソッドを呼ぶか、symbol.descriptionプロパティを利用して、説明のみを表示する
+
+・オブジェクトリテラルの中でシンボルを利用する場合は、角括弧で囲む
+　例：let id = Symbol("id");
+
+      let user = {
+        name: "John",
+        [id]: 123 // 単に "id: 123" ではない
+      };
+
+・シンボルはfor..inではスキップされる
+　ただし、Object.assignは文字列とシンボルプロパティ両方をコピーする
+
+・Symbol.for(key)を用いればグローバルシンボルレジストリから存在するシンボル名へアクセスできる
+　例：// グローバルレジストリから読む
+　　　let id = Symbol.for("id"); // symbol が存在しない場合、作られます
+
+　　　// 再度読み込み
+　　　let idAgain = Symbol.for("id");
+
+　　　// 同じシンボル
+　　　alert( id === idAgain ); // true
+
+・Symbol.keyFor(sym)で逆方向の呼び出しができる
+　例：// 名前 から シンボルを取得
+　　　let sym = Symbol.for("name");
+　　　let sym2 = Symbol.for("id");
+
+　　　// symbol から名前を取得
+　　　alert( Symbol.keyFor(sym) ); // name
+　　　alert( Symbol.keyFor(sym2) ); // id
+
+・シンボルは技術的には100%隠れるわけではない
+　すべてのシンボルを取得する組み込み関数[Object.getOwnPropertySymbols(obj)]
+　シンボリックなものも含めてオブジェクトのすべてのキーを返す[Reflect.ownKeys(obj)]
+
+##オブジェクトからプリミティブへの変換
+・型変換にはhint（ヒント）と呼ばれる3つのバリエーションがある
+
+・JavaScriptでは型変換を以下の流れで行う
+　１，メソッドが存在する場合、obj[Symbol.toPrimitive](hint) を呼び出す
+　２，ない場合、hint が "string" であれば
+　　　　obj.toString() と obj.valueOf() を試す。
+　３，そうでなく、hint が "number" であれば
+　　　　obj.valueOf() と obj.toString() を試す。
+
+・Symbol.toPrimitiveという名前の組み込みシンボルがある
+　let user = {
+  　name: "John",
+  　money: 1000,
+
+  　[Symbol.toPrimitive](hint) {
+    　alert(`hint: ${hint}`);
+    　return hint == "string" ? `{name: "${this.name}"}` : this.money;
+  　}
+　};
+
+　// 変換動作の確認:
+　alert(user); // hint: string -> {name: "John"}
+　alert(+user); // hint: number -> 1000
+　alert(user + 500); // hint: default -> 1500
+
+・Symbol.toPrimitiveがない場合はtoStringとvalueOfメソッドを用いて型変換を行う
+
+・Symbol.toPrimitiveがない場合でもtoStringとvalueOfメソッドを用いて同様の操作を行うことができる
+　let user = {
+  　name: "John",
+  　money: 1000,
+
+ 　 // hint="string" の場合
+ 　 toString() {
+   　 return `{name: "${this.name}"}`;
+  　},
+
+　  // hint="number" or "default" の場合
+  　valueOf() {
+    　return this.money;
+  　}　
+
+　};
+
+　alert(user); // toString -> {name: "John"}
+　alert(+user); // valueOf -> 1000
+　alert(user + 500); // valueOf -> 1500
+
+・すべてのプリミティブ変換メソッドは必ずしもヒントの型のプリミティブを返すとは限らない
+　ただ、少なくともプリミティブな値は返ってくる
+
+・toStringは他のメソッド（Symbol.toPrimitive,valueOf）がない場合にすべての変換を処理する
+
+#データ型
+##プリミティブのメソッド
+・プリミティブ型は7つ
+　string,number,bigint,boolean,symbol,null,undefined
+
+・プリミティブには、nullとundefinedを除いて、多くの役立つラッパーメソッドがある
+　形式的にはオブジェクトのように内部にメソッドがあるようにみえるが、実際にはオブジェクトラッパーと呼ばれるものが作られ、そこからメソッドが提供されている
+
+##数値
+・JavaScriptエンジンでは単に数字のアンダースコアは無視される
+
+・1,000,000,000 = 1e9で表せる
+
+・0.000001 = 1e-6で表せる
+
+・16進数は0x～で書く
+
+・2進数は0b～で書く
+
+・8進数は0o～で書く
+
+・num.toString(base)は与えられたbaseの記数法でnumの文字列表現を返す
+　デフォルトは10
+
+・数値に対して直接メソッドを呼び出したい場合には123..toString(36)または、(123).toString(36)というように呼ぶ
+
+・Math.floor：切り捨て
+　3.1は3に、-1.1は-2になる
+
+・Math.ceil：切り上げ
+  3.1は4に、-1.1は-1になる
+
+・Math.round：四捨五入して最も近い整数にする
+　3.1は3に、-1.1は-1
+
+・Math.trunc(IEでは未サポート)：小数点以下を切り捨て
+　3.6は3に-1.5は-1に
+
+・特定の桁に丸めたい場合
+　1,乗除法
+　let num = 1.23456;
+
+　alert( Math.floor(num * 100) / 100 ); // 1.23456 -> 123.456 -> 123 -> 1.23
+
+　2,toFixedメソッドを用いる
+　let num = 12.34;
+　alert( num.toFixed(1) ); // "12.3"
+
+　let num = 12.36;
+　alert( num.toFixed(1) ); // "12.4"
+
+　let num = 12.34;
+　alert( num.toFixed(5) ); // "12.34000", 正確に5桁になるよう 0 が追加される
+　ただし、返値は文字列
+
+・数値は2進数で処理しているため、10できれいに割り切ることができず
+  alert( 0.1 + 0.2 == 0.3 ); // false
+　となり、
+　alert( 0.1 + 0.2 ); // 0.30000000000000004
+　となっているため、除算を行う際には、toFixedメソッドを用いて丸める
+
+・6.35.toFixed(1)が6.3になるのは、内部的には6.3499999999964473というように精度が低いため
+　正しく丸めるにはMath.round(6.35*10) / 10を行う
+
+・
+
+・乗除法で一時的に整数に変換することでもエラーは減少するが、完全には除去できない
+
+・isNan(value)メソッドではvalueを数値に変換し、NaNであるかをテストする
+　NaN === NaNはfalseとなる
+
+・isFinite(value)メソッドでは、valueを数値に変換し、Infinityではなく通常の数値であればtrueを返す
+
+・===のように比較する特別な組み込みオブジェクト、Object.isがある
+　Object.is(NaN,NaN) === true
+  Object.is(0,-0) === false
+  となる
+
+　上記以外のケースではObject.is(a,b)はa===bと同じ
+
+・parseIntやparseFloatはできるだけ文字列から数値を読み込み、エラーが起きると、それまでに読み込んだ数値を返す
+　例：alert( parseInt('100px') ); 　　// 100
+　　　alert( parseFloat('12.5em') );  // 12.5
+　　　alert( parseInt('12.3') ); 　　 // 12 
+　　　alert( parseFloat('12.3.4') );  // 12.3 
+　　　alert( parseInt('a123') ); 　　 // NaN
+
+・pareseIntやparseFloatも第２引数で、n進数へ変換できる
+
+・Math.random()：0から1まで（1は含まない）のランダムな数値を返す
+
+・Math.max(a,b,c,...)/Math.min(a,b,c,...)：任意の引数から最大/最小を返す
+
+・Math.pow(n,power)：n**powerを行う
+
+##文字列
+・シングルとダブルクォートは本質的には同じ
+
+・バッククォートは文字列の中に関数呼び出しを含む任意の式を埋め込める
+　バッククォートを使うと、文字列を複数の行にまたげる
+
+・改行文字の\nを使うことで、シングルクォートで複数行の文字列を作ることが可能
+
+・\t:タブ
+
+・lengthは数値プロパティ
+
+・posの位置を取得する場合、角括弧[pos]または、charAt(pos)メソッドを呼び出す
+　文字が見つからない場合角括弧[]はundefinedを返し、charAtは空文字を返す
+
+・文字列はfor..ofを使ってイテレートできる
+
+・文字列中の文字の一部を変更することはできない
+
+・toLowerCase(),toUpperCase()は文字列を小文字/大文字に変換する
+
+・str.indexOf(substr,pos)メソッドはstrの中でsubstrをposの位置から探すメソッド
+
+・～演算子のbitwiseNOTでは数値を32bit整数に変換し（もし存在すれば小数部分を除いて）、その2進数表現のすべてのビットを反転する
+　実質-(n+1)となる
+　なので、～-1は0と等しいので、これを用いて
+　if(～str.indexOf())というようにindexOfチェックの短縮形として使われる
+
+・str.includes(substr,pos)はstrがsubstrを含めばtrueを返す
+
+・str.startsWith,str.endsWithはそれらの名前が始まり/終わりにあるかをチェックし、true/falseを返す
+
+・str.slice(start[, end])：startからendまで（ただし、含まない）の文字列の一部を返す
+　2つめの引数がない場合、文字列の最後までを返す
+　start/endは負の値も指定可能で、その場合は、文字列の末尾からカウントされる
+
+・str.substring(start[, end])はstartとendの間の文字列の一部を返す
+　startがendより大きくても動作する
+　負の値はサポートしていない
+
+・str.substr(start[, length])はstartから与えられたlength分の、文字列の一部を返す
+　startは負の値も指定可能
+
+・文字列比較では小文字は大文字より大きい
+
+##配列
+・pushは要素を末尾に追加
+
+・shiftは最初から要素を取得し、2番目の要素が1番目になるようにキューを進める
+
+・popは末尾から要素を取り出す
+
+・unshiftは配列の先頭に要素を追加
+
+・配列はオブジェクトなので、オブジェクトと同じ動作になる
+
+・push,popは処理が速く、shift,unshiftは遅い
+
+・配列のためのfor..ofという別のループ形式がある
+　for..ofは現在の要素の番号へアクセスすることができず、単に値のみ
+
+・技術的には、配列はオブジェクトなのでfor..inを利用することもできる
+　しかし、for..inは数値だけでなく、すべてのプロパティを繰り返し処理するため、余計な処理が必要となる
+　for..inループは10から100倍遅くなる
+
+・配列のlengthプロパティを減らしたとき、配列はlengthに合わせて切り捨てられる
+　そのため、配列をクリアするにはarr.length = 0とするとよい
+
+・配列のtoStringメソッドは要素のカンマ区切りのリストを返す
+
+##配列のメソッド
+・配列の要素に対してdeleteを実行しても、その要素がundefinedとなるだけで、配列は圧縮されない
+
+・arr.splice(index[,deleteCount, elem1, ..., elemN)：位置indexからdeleteCountまでを削除し、elemに置き換える
+　返値には、削除した要素の配列
+
+・spliceメソッドのdeleteCountに0をセットすれば、削除せずに挿入することも可能
+
+・spliceメソッドは負のインデックスも許容する
+
+・arr.slice(start, end)はstartからend(endは含まない)のすべてのアイテムをコピーした新しい配列を返す
+  startとendはともに負の値を取ることができる
+
+・arr.slice()は引数なしでも呼び出せ、その場合は、arrのコピーを生成する
+
+・arr.concatは配列を他の配列またはアイテムと結合する
+　例：let arr = [1, 2];
+
+　　　// arr と [3,4] をマージ
+　　　alert( arr.concat([3, 4])); // 1,2,3,4
+
+　　　// arr と [3,4] と [5,6] をマージ
+　　　alert( arr.concat([3, 4], [5, 6])); // 1,2,3,4,5,6
+
+　　　// arr と [3,4] をマージ後, 5 と 6 を追加
+　　　alert( arr.concat([3, 4], 5, 6)); // 1,2,3,4,5,6
+
+・arr.concatは通常、配列のように見えるオブジェクトでも、全体として追加されるが、オブジェクトがSymbol.isConcatSpreadableプロパティを持つ場合、配列として扱う
+
+・arr.forEachメソッドは配列の全要素(item,index,array)に対して関数を実行することができる
+
+・arr.indexOf(item, from)：インデックスfromからitemを探し、見つかった場所のインデックスを返す
+　そうでない場合は-1になる
+
+・arr.lastIndexOf(item, from)は上記と同じだが、右から左に見ていく
+
+・arr.includes(item, from)はインデックスfromからitemを探し、見つかった場合、trueを返す
+
+・arr.indexOf,arr.lastIndexOf,arr.includesは===比較を行う
+　ただし、includesメソッドでは、NaNを正しく処理することができる
