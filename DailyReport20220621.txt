@@ -1,0 +1,186 @@
+作業内容
+・JavaScriptチュートリアル
+　開始：データ型-配列のメソッド-indexOf/lastIndexOf and includes
+　終了：データ型-配列のメソッド
+
+・travelistのlabel(性別選択)を男女分けずにクリック検知を行う処理の作成
+
+・TypeScriptの勉強会参加
+
+・安達さんとの顔合わせ兼採用企画についての話し合い
+
+以下本日の学習内容
+JavaScriptチュートリアル
+#データ型
+##配列のメソッド
+・オブジェクトの配列から特定のオブジェクトを探索する際にはarr.findメソッドを用いる
+　例：let users = [
+  	{id: 1, name: "John"},
+  	{id: 2, name: "Pete"},
+  	{id: 3, name: "Mary"}
+　　　];
+
+　　　let user = users.find(item => item.id == 1);
+
+　　　alert(user.name); // John
+　findメソッドはtrueを返すと検索が止まりitemが返却される(単一の要素)
+　見つからない場合はundefinedになる
+
+・filterメソッドはマッチしたすべての要素の配列を返す
+　例：let users = [
+  　　　{id: 1, name: "John"},
+  　　　{id: 2, name: "Pete"},
+  　　　{id: 3, name: "Mary"}
+　　　];
+
+　　　// 最初の2人のユーザの配列を返す
+　　　let someUsers = users.filter(item => item.id < 3);
+
+　　　alert(someUsers.length); // 2
+
+・mapメソッドは配列の各要素に対して関数を呼び出し、結果の配列を返す
+　例：let lengths = ["Bilbo", "Gandalf", "Nazgul"].map(item => item.length)
+　　　alert(lengths); // 5,7,6
+
+・ソートメソッドは配列を決まった位置にソートし、要素の順番を変更する
+　ソートされた配列を返すが、arr自身が変更されるので、通常返却値は無視される
+　ソートメソッドではアイテムはデフォルトで文字列としてソートする
+　独自のソート順を使うには、arr.sort()の引数として、2つの引数をもつ関数を指定する必要がある
+　例：function compareNumeric(a, b) {
+  　　　if (a > b) return 1;
+  　　　if (a == b) return 0;
+  　　　if (a < b) return -1;
+　　　}
+
+　　　let arr = [ 1, 2, 15 ];
+
+　　　arr.sort(compareNumeric);
+
+　　　alert(arr);  // 1, 2, 15
+　実際には、比較関数は正の数を「より大きい」、負の数を「より小さい」として返せれば十分
+　例：let arr = [ 1, 2, 15 ];
+
+　　　arr.sort(function(a, b) { return a - b; });
+
+　　　alert(arr);  // 1, 2, 15
+
+　アロー関数を用いると
+　arr.sort( (a, b) => a - b );
+
+・ドイツ語など単語を特殊な書き方をする言語の並び替えにはstr.localCompareを引数で使用すると良い
+
+・arr.reverseはarr内の要素の順序を逆転させる
+
+・str.split(delim)メソッドはdelimで文字列を配列に分割する
+　第２引数で、数値を指定した場合、余分な要素は無視される
+　str.split("")とすると1文字ずつ分割する
+
+・arr.join(str)はarrのアイテムをstrでつないだ文字列をつくる
+
+・reduce/reduceRightメソッドは配列に基づいて単一の値を計算するために使う
+　let value = arr.reduce(function(accumulator, item, index, arr) {
+  　// ...
+　}, initial);
+　関数は各要素に順番に適用され、その結果を次の呼び出しに"引き継ぐ"
+  accumulator-前の関数の呼び出しの結果で、初回はinitialと等価(initialが指定されている場合)
+　item-現在の配列の項目
+　index-位置
+　arr-配列
+
+　例：let arr = [1, 2, 3, 4, 5];
+
+　　　let result = arr.reduce((sum, current) => sum + current, 0);
+
+　　　alert(result); // 15
+　initialを省略した場合、配列の最初の要素を初期値とみなし、2つ目の要素から繰り返し処理を始めるため
+　ただし、配列が空の場合、初期値がない状態でreduceを呼び出すとエラーが発生するため、初期値は常に指定しておいたほうがよい
+
+・arr.resuceRightメソッドはreduceメソッドと同じ内容を右から左に実行する
+
+・配列はtypeofメソッドではobject型と返されるが、Array.isArray(value)メソッドを用いれば、valueが配列のときにtrueを、そうでないときにはfalseを返す
+
+・find,filter,mapのような関数を呼び出すほとんどの配列メソッドは、sortの例外を除いて、任意の追加パラメータthisArgを受け取る
+　これは、以下のような状況で
+　let army = {
+  　minAge: 18,
+  　maxAge: 27,
+  　canJoin(user) {
+    　return user.age >= this.minAge && user.age < this.maxAge;
+  　}
+　};
+
+　let users = [
+  　{age: 16},
+  　{age: 20},
+  　{age: 23},
+  　{age: 30}
+　];
+
+　// army.canJoin が true となるユーザを見つけます
+　let soldiers = users.filter(army.canJoin, army);
+
+　alert(soldiers.length); // 2
+　alert(soldiers[0].age); // 20
+　alert(soldiers[1].age); // 23
+　users.filterがエラーにならないようにするために用いる
+　もしusers.filter(army.canjoin)としていた場合、army.canJoinはスタンドアローンの関数として呼び出されるため、this=undefinedであり、即時エラーになる
+　多くの場合、users.filter(army.canJoin, army)はusers.filter(user => army.canJoin(user))に置き換えて使われる
+
+・arr.some(fn)/arr.every(fn)は配列をチェックする
+　関数fnはmapと同じように配列の各要素で呼ばれ、もしどれか/すべての結果はtrueであればtrue,それ以外の場合はfalseになる
+　everyは配列を比較するのに使える
+
+・arr.fill(value, start, end)-インデックスstartからendまでvalueで配列を埋める
+
+label抽出プログラム
+(function () {
+	//input要素の抽出
+	var inputs = document.querySelectorAll('input');
+	inputs.forEach(function (input) {
+		input.addEventListener('focus', function () {
+			dataLayer.push({
+				'formElementName': input.name || input.id,
+				'event': 'inputElementFocus'
+			})
+		});
+	})
+	//select要素の抽出
+	var selects = document.querySelectorAll('select');
+	selects.forEach(function (select) {
+		select.addEventListener('focus', function () {
+			dataLayer.push({
+				'selectElementName': select.dataset.e2eId,
+				'event': 'selectElementFocus'
+			})
+		});
+	})
+
+	//lavel要素の抽出
+	var inputs = document.querySelectorAll('input[name="applicant_sex"]');
+	inputs.forEach(function (input) {
+		input.addEventListener('click', function () {
+			dataLayer.push({
+				'selectElementName': input.name,
+				'event': 'labelElementClick'
+			})
+		})
+	})
+	
+}());
+
+TypeScript勉強会
+https://www.typescriptlang.org/play#code/PTAEHUFMBsGMHsC2lQBd5oBYoCoE8AHSAZVgCcBLA1UABWgEM8BzM+AVwDsATAGiwoBnUENANQAd0gAjQRVSQAUCEmYKsTKGYUAbpGF4OY0BoadYKdJMoL+gzAzIoz3UNEiPOofEVKVqAHSKymAAmkYI7NCuqGqcANag8ABmIjQUXrFOKBJMggBcISGgoAC0oACCbvCwDKgU8JkY7p7ehCTkVDQS2E6gnPCxGcwmZqDSTgzxxWWVoASMFmgYkAAeRJTInN3ymj4d-jSCeNsMq-wuoPaOltigAKoASgAywhK7SbGQZIIz5VWCFzSeCrZagNYbChbHaxUDcCjJZLfSDbExIAgUdxkUBIursJzCFJtXydajBBCcQQ0MwAUVWDEQC0gADVHBQGNJ3KAALygABEAAkYNAMOB4GRonzFBTBPB3AERcwABS0+mM9ysygc9wASmCKhwzQ8
+でブラウザ上でTypeScriptを実行できる
+
+型チェックができる
+→JSでは実行してみなと分からないことがいっぱい
+・TypeScriptでは静的に型を付与して、hoge.foo()が実行できるかをソースコードのレベルでチェックできる
+
+・async/awaitはIEでは動かないが、TypeScriptでは動く形に変換してくれる
+
+・静的型付けでは、関数の引数などにおいて意図しない動作を事前にエラーの形で知ることができる
+
+・TypeScriptではtype構文で型に別名を付けて再利用できる
+　→classに似ている？
+
+・TypeScriptではClassを使える
