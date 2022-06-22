@@ -1,0 +1,529 @@
+作業内容
+・JavaScriptチュートリアル
+　開始：データ型-反復可能なオブジェクト
+　終了：データ型-JSONメソッド,toJSON
+
+以下本日の学習内容
+
+#データ型
+##反復可能なオブジェクト
+・配列と文字列は組み込みのiterablesがある
+
+・イテレータを明示的に呼び出し、while文を用いて、for..ofループと同じことができる
+　例：let str = "Hello";
+
+　　　// for (let char of str) alert(char);
+　　　// と同じ
+
+　　　let iterator = str[Symbol.iterator]();
+
+　　　while (true) {
+  　　　let result = iterator.next();
+  　　　if (result.done) break;
+  　　　alert(result.value); // 1つずつ文字を出力
+　　　}
+
+・Array.from はオブジェクトを取り出し、反復可能(iterable) か 配列ライク(array-like) なのか調べ、新しい配列を作りすべてのアイテムをコピーする
+　Array.fromを用いればサロゲートを意識したsliceを実装することもできる
+
+##MapとSet
+・MapとはObjectと同様にキー付けされたデータ項目の集まり
+　Mapは任意の型のキーを利用することができる
+　そのため、
+　map.set('1','str1');と
+　map.set(1, 'num1')は競合しない
+　Objectのキーは文字列のみ
+　
+
+・Mapの主なメソッド
+　new Map() – 新しい map を作る
+　map.set(key, value) – keyでvalueを格納
+　map.get(key) – 指定されたkeyの値を返す　
+　　　　　　　　　map に存在しない key の場合には undefined になる
+　map.has(key) – キーが存在する場合に true を返す
+　　　　　　　　　そうでなければ false になる
+　map.delete(key) – keyに格納されている値を削除
+　map.clear() – map を削除
+　map.size – 現在の要素数
+
+・map[key]という書き方では、MapではなくObjectとして扱うことになるので注意
+
+・mapではkeyとしてObjectを用いることができる
+
+・Mapは等価を比較する際に厳密等価(===)と同じような比較をするが、NaNはNaNと等しいと見なすため、NaNもキーとして利用可能
+
+・map.set呼び出しはmap自身を返すので、呼び出しをチェーンできる
+
+・Mapでの繰り返し
+　let recipeMap = new Map([
+  　['cucumber', 500],
+  　['tomatoes', 350],
+  　['onion',    50]
+　]);
+
+　// キー(野菜)の反復
+　for (let vegetable of recipeMap.keys()) {
+  　alert(vegetable); // cucumber, tomateos, onion
+　}
+
+　// 値(量)の反復
+　for (let amount of recipeMap.values()) {
+  　alert(amount); // 500, 350, 50
+　}　
+
+　// [key, value] エントリーの反復
+　for (let entry of recipeMap) { // recipeMap.entries() と同じ
+  　alert(entry); // cucumber,500 (など)
+　}
+
+・Mapの繰り返しは挿入順となる
+
+・MapはArrayと同様に、組み込みのforEachメソッドを持っている
+　// 各 (key, value) ペアに対して関数を実行
+　recipeMap.forEach( (value, key, map) => {
+  　alert(`${key}: ${value}`); // cucumber: 500 etc
+　});
+
+・Mapを生成する時、キー/値のペアをもつ配列を渡すことができる
+　例：// [key, value] ペアの配列
+　　　let map = new Map([
+  　　　['1',  'str1'],
+  　　　[1,    'num1'],
+  　　　[true, 'bool1']
+　　　]);
+
+　　　alert( map.get('1') ); // str1
+
+・通常のオブジェクトをMapとして利用したい場合、Object.entries(obj)を用いると簡単にできる
+　Object.entriesはキー/値のペアの配列を返す以下の場合は[ ["naem", "John"], ["age", 30] ]
+　例：let obj = {
+  　　　name: "John",
+  　　　age: 30
+　　　};
+
+　　　let map = new Map(Object.entries(obj));
+
+　　　alert( map.get('name') ); // John
+
+・[key, value]ペアの配列からオブジェクトを作成するObject.fromEntriesもある
+　例：配列からオブジェクトへ変換
+　let prices = Object.fromEntries([
+  　['banana', 1],
+  　['orange', 2],
+  　['meat', 4]
+　]);
+
+　// prices = { banana: 1, orange: 2, meat: 4 }
+
+　alert(prices.orange); // 2
+
+　例：マップからオブジェクトへ変換
+　let map = new Map();
+　map.set('banana', 1);　
+　map.set('orange', 2);
+　map.set('meat', 4);
+
+　let obj = Object.fromEntries(map.entries()); // 通常のオブジェクトを作成
+　//let obj = Object.fromEntries(map);でも可
+
+　// 完了!
+　// obj = { banana: 1, orange: 2, meat: 4 }
+
+　alert(obj.orange); // 2
+
+・Setではキー無し、重複なしの値の集合を作成できる
+　Setは一意性チェックを高速に行うように最適化されている
+　主なメソッド
+　new Set(iterable) – setの作成
+　　　　　　　　　　　オプションで値の配列(任意の iterable が指定可能)からも作成可能
+　set.add(value) – 値を追加し、 set 自身を返す
+　set.delete(value) – 値を削除し、value が呼び出し時に存在すれば true
+　　　　　　　　　　　 そうでなければ false を返す
+　set.has(value) – set の中に値が存在すれば true を返す
+　　　　　　　　　　それ以外は false
+　set.clear() – set から全てを削除
+　set.size – set の要素数
+　
+　例：let set = new Set();
+
+　　　let john = { name: "John" };
+　　　let pete = { name: "Pete" };
+　　　let mary = { name: "Mary" };
+
+　　　// 同じ値を重複させて追加
+　　　set.add(john);
+　　　set.add(pete);
+　　　set.add(mary);
+　　　set.add(john);
+　　　set.add(mary);
+
+　　　// setは重複値は無視する
+　　　alert( set.size ); // 3
+
+　　　for (let user of set) {
+  　　　alert(user.name); // John (そして Pete と Mary)
+　　　}
+
+・Setの繰り返しはfor..ofまたは、forEachを使うことでループすることができる
+　ただし、SetのforEachではvalueが引数に2度現れる
+　例：let set = new Set(["oranges", "apples", "bananas"]);
+
+　　　for (let value of set) alert(value);
+
+　　　// forEach と同じ:
+　　　set.forEach((value, valueAgain, set) => {
+  　　　alert(value);
+　　　});
+　これは特定のケースにおいて簡単にMapをSetに、またはその逆を行えるようにするため
+
+・SetはMapがイテレーションのために持っているメソッドと同じメソッドもサポートしている
+　set.keys() – 値に対する iterable なオブジェクトを返す
+  set.values() – set.keys と同じ動作で、Map との互換性のため
+  set.entries() – [value, value] のエントリのための iterable なオブジェクトを返す
+　　　　　　　　　Map の互換性のため
+
+・MapとSetのイテレーションは常に挿入順で行われる
+
+・単語（文字列）を並び替えたい場合は、split("").sort().join("")するとよい
+
+・Object.values()は列挙可能なプロパティの値(valueのみ)をfor..inループで提供される場合と同じ順序で配列にして返す
+
+##WeakMapとWeakSet
+・WeakMapのキーはプリミティブな値ではなくオブジェクトでなければならない
+　WeakMapはキーとして利用したオブジェクトの参照が削除されたとき、WeakMap内のjohnも削除される
+　例：let john = { name: "John" };
+
+　　　let weakMap = new WeakMap();
+　　　weakMap.set(john, "...");
+
+　　　john = null; // 参照を上書き
+
+　　// john はメモリから削除される
+
+・WeakMapは繰り返しと、メソッドのkesy(),values(),entries()をサポートしていない
+
+・WeakMapのメソッド
+　weakMap.get(key)
+　weakMap.set(key, value)
+　weakMap.delete(key, value)
+　weakMap.has(key)
+
+・WeakMapはキャッシュとしてデータを保存する際に便利
+
+・WeakSetはオブジェクトのみ追加できる
+
+・WeakSetはsize,keys()とイテレーションをサポートしていない
+
+・WeakSetのメソッド
+　WeakSet.add()
+  WeakSet.has()
+  WeakSet.delete()
+
+・WeakMapやWeakSetはイテレーションの欠如と現在のすべてのコンテンツを取得できないという制限があるが、別の場所に保存/管理されているオブジェクトデータの追加の保存場所として利用する際には便利
+
+##Objekt.keys,values,entries
+・Objectでkeysやvalues、entriesメソッドを呼ぶ際には、変数名.ではなくObjet.～(obj)という形になる
+　また、Object.～(obj)では反復可能オブジェクトではなく、本当の配列が返される
+
+・Objectでmapやfilterなどの配列のメソッドを用いたい場合は以下のように配列に変換してメソッドを実行し、再びオブジェクトに戻すとよい
+　let prices = {
+  　banana: 1,
+  　orange: 2,
+  　meat: 4,
+　};
+
+　let doublePrices = Object.fromEntries(
+  　// 配列に変換して map を実行、その後 fromEntries でオブジェクトに戻す
+  　Object.entries(prices).map(([key, value]) => [key, value * 2])
+　);
+
+　alert(doublePrices.meat); // 8
+
+・Object.entries(obj)は2重配列ではなく、単に配列になる
+
+##分割代入
+・分割代入はオブジェクトや配列を部分的に取り出すことができる
+　例：配列の場合
+　// 姓名の配列
+　let arr = ["John", "Smith"]
+
+　// 分割代入
+　// sets firstName = arr[0]
+　// and surname = arr[1]
+　let [firstName, surname] = arr;
+
+　alert(firstName); // John
+　alert(surname);  // Smith
+
+・分割代入はもとの配列には影響を及ぼさない
+
+・配列の不要な要素は、余分なカンマをつけることで捨てることができる
+　例：// 1番目、2番目の要素が不要の場合
+　　　let [, , title] = ["Julius", "Caesar", "Consul", "of the Roman Republic"];
+
+　　　alert( title ); // Consul
+　残りの要素は指定しなければスキップされる
+
+・実際には配列だけでなく、任意の反復可能オブジェクトに対しても動作する
+　
+・分割代入では左辺には任意の割り当て可能なものを指定できる
+　例：let user = {};
+　　　[user.name, user.surname] = "John Smith".split(' ');
+
+　　　alert(user.name); // John
+　　　alert(user.surname); // Smith
+
+・分割代入は変数の値を入れ替えるのにも利用できる
+　例：let guest = "Jane";
+　　　let admin = "Pete";
+
+　　　// 値を入れかえ: guest=Pete, admin=Jane
+　　　[guest, admin] = [admin, guest];
+
+　　　alert(`${guest} ${admin}`); // Pete Jane
+
+・通常、代入する変数の数よりも配列の要素数の方が多い場合、残りの項目はスキップされるが、...を用いれば残りのすべての要素を取得できる
+　例：let [name1, name2, ...rest] = ["Julius", "Caesar", "Consul", "of the Roman Republic"];
+
+　　　// rest は３つ目の項目からの配列
+　　　alert(rest[0]); // Consul
+　　　alert(rest[1]); // of the Roman Republic
+　　　alert(rest.length); // 2
+
+・代入する変数の値よりも配列の要素数のほうが少ない場合はエラーにならず、不足している値はundefinedとみなされる
+
+・値がなかった場合にデフォルト値を使いたい場合は、=を使ってデフォルト値を指定できる
+　例：// デフォルト値
+　　　let [name = "Guest", surname = "Anonymous"] = ["Julius"];
+
+　　　alert(name);    // Julius (配列の値)
+　　　alert(surname); // Anonymous (デフォルト値)
+
+・デフォルト値は値がないとなった場合に実行される
+　例：prompt()はsurnameのみしか実行されない
+　// 姓のプロンプトのみ実行される
+　let [name = prompt('name?'), surname = prompt('surname?')] = ["Julius"];
+
+　alert(name);    // Julius (配列から)
+　alert(surname); // プロンプトが得たもの
+
+・オブジェクトの分割代入はlet {var1, var2} = {var1:…, var2…}となる
+　例：let options = {
+  　　　title: "Menu",
+  　　　width: 100,
+  　　　height: 200
+　　　};
+
+　　　let {title, width, height} = options;
+
+　　　alert(title);  // Menu
+　　　alert(width);  // 100
+　　　alert(height); // 200
+　この際、順序は関係なく、対応する変数に代入される
+　例：// let {...} 内のプロパティ順を変えた場合
+　　　let {height, width, title} = { title: "Menu", height: 200, width: 100 }
+
+・変数名を異なる値にしたい場合、コロンを使うことで変更できる
+　例：let options = {
+  　　　title: "Menu",
+  　　　width: 100,
+  　　　height: 200
+　　　};
+
+　　　// { 元のプロパティ: ターゲットとなる変数 }
+　　　let {width: w, height: h, title} = options;
+
+　　　// width -> w
+　　　// height -> h
+　　　// title -> title
+
+　　　alert(title);  // Menu
+　　　alert(w);      // 100
+　　　alert(h);      // 200
+
+・オブジェクトの場合も配列の場合と同様に、値がない場合は=でデフォルト値を設定できる
+
+・オブジェクトの場合も残されたプロパティは...を用いて取得できる
+　例：オブジェクトの場合
+　let options = {
+  　title: "Menu",
+  　height: 200,
+  　width: 100
+　};
+
+　// title = title と名前付けられたプロパティ
+　// rest = オブジェクトのプロパティの残り
+　let {title, ...rest} = options;
+
+　// now title="Menu", rest={height: 200, width: 100}
+　alert(rest.height);  // 200
+　alert(rest.width);   // 100
+
+・分割代入する際に、事前に定義した変数を用いる場合には、文全体に丸括弧が必要
+　例：let title, width, height;
+
+　　　({title, width, height} = {title: "Menu", width: 200, height: 100});
+
+　　　alert( title ); // Menu
+
+・入れ子構造の分割代入を行う場合は、左辺も入れ子構造にする
+　例：let options = {
+  　　　size: {
+    　　　width: 100,
+    　　　height: 200
+  　　　},
+  　　　items: ["Cake", "Donut"],
+  　　　extra: true
+　　　};
+
+　　　// わかりやすくするために、複数の行での分割代入
+　　　let {
+  　　　size: { // ここにサイズを格納
+    　　　width,
+    　　　height
+  　　　},
+  　　　items: [item1, item2], // ここに items を割り当てる
+  　　　title = "Menu" // オブジェクトには存在しない (デフォルト値)
+　　　} = options;
+
+　　　alert(title);  // Menu
+　　　alert(width);  // 100
+　　　alert(height); // 200
+　　　alert(item1);  // Cake
+　　　alert(item2);  // Donut
+　この場合、sizeはなく、width,heigth、itemsはなく、item1,item2となることに注意
+
+##日付と時刻
+・new Date()でDateオブジェクトを作る
+　引数なし-現在日時で作成
+　newDate(milliseconds)-1970年1月1日UTC+0から経過したミリ秒に等しい時間で作成
+　この数値のことをタイムスタンプと呼ぶ
+　1970年1月1日以前は負のタイムスタンプになる
+　newDate(datestring)-1つの引数でそれが文字列の場合、自動で変換される
+　newDate(year, month, date, hours, minutes, seconds, ms)-与えられた引数の要素で作成
+　yearとmonthは必須
+　yearは4桁
+　monthは0(1月)～11(12月)で表す
+　省略された引数は0とみなす
+
+・Dateオブジェクトへアクセスするメソッド
+　getFullYear()-年を4桁で取得
+　getMonth()-0から11で月を取得
+　getDate()-日付を1～31で取得
+　getHours(),getMinutes(),getSeconds(),getMilliseconds()-対応する要素を取得
+　getDay()-曜日を0(日曜)～6(土曜)で取得
+
+・Dateオブジェクトへ値を設定するメソッド
+　setFullYear(year [, month, date])
+  setMonth(month [, date])
+　setDate(date)
+　setHours(hour [, min, sec, ms])
+　setMinutes(min [, sec, ms])
+　setSeconds(sec [, ms])
+　setMilliseconds(ms)
+　setTime(milliseconds)(1970年1月1日UTC+0からの経過日をミリ秒で設定)
+
+・date.setDate(date.getDate() + 2);とすることで2日後の日付を取得できる
+　その他の値も、+～とすることで、自動で補正してくれる
+
+・0や-の場合も同様に補正してくれる
+
+・Dateオブジェクトが数値へ変換される場合は、タイムスタンプとなる
+
+・日付は減算できるが、計算結果はms単位で返される
+
+・Date.now()を使えば、Dateオブジェクトを作らずに現在のタイムスタンプを取得できる
+
+・Date.parse("YYYY-MM-DDTHH:mm:ss.sssZ")で文字列からタイムスタンプへ変換できる
+
+##JSONメソッド、toJSON
+・データをやりとりする形式としてJSONという形式が一般的
+　JSON.stringify(obj)-objをJSON形式のデータに変換
+　JSON.parse(json)-jsonをオブジェクトに変換
+
+・JSON形式のデータでは、文字列にダブルクォートを用いて、シングルやバッククォートは使えない
+
+・JSON.stringifyはオブジェクト、配列、文字列、数値、真偽値、nullに対応している
+
+・JSONではJavaScript固有のオブジェクトプロパティであるメソッド、シンボル、undefinedを格納しているプロパティは無視される
+　例：let user = {
+  　　　sayHi() { // 無視される
+    　　　alert("Hello");
+  　　　},
+  　　　[Symbol("id")]: 123, // 無視される
+  　　　something: undefined // 無視される
+　　　};
+
+　　　alert( JSON.stringify(user) ); // {} (空オブジェクト)
+
+・JSON.stringifyは入れ子のオブジェクトもサポートされている
+　例：let meetup = {
+  　　　title: "Conference",
+  　　　room: {
+    　　　number: 123,
+    　　　participants: ["john", "ann"]
+  　　　}
+　　　};
+
+　　　alert( JSON.stringify(meetup) );
+　　　/* 構造全体が文字列化される:
+　　　{
+  　　　"title":"Conference",
+  　　　"room":{"number":23,"participants":["john","ann"]},
+　　　}
+　　　*/
+
+・循環参照（2つのオブジェクトが互いを参照し合っている状態）している場合はJSON化に失敗する
+
+・JSON.stiringifyの第２引数にプロパティの配列を渡した場合、それらのプロパティのみがエンコードされる
+　このプロパティの配列が長くなる場合には、replacer関数を用いて、例外のみを渡すこともできる
+　例：replacer関数
+　let room = {
+  　number: 23
+　};
+
+　let meetup = {
+  　title: "Conference",
+  　participants: [{name: "John"}, {name: "Alice"}],
+  　place: room // meetup は room を参照
+　};
+
+　room.occupiedBy = meetup; // room は meetup を参照
+
+　alert( JSON.stringify(meetup, function replacer(key, value) {
+  　alert(`${key}: ${value}`);
+ 　 return (key == 'occupiedBy') ? undefined : value;
+　}));
+
+　/* key:value pairs that come to replacer:
+　:             [object Object]
+　title:        Conference
+　participants: [object Object],[object Object]
+　0:            [object Object]
+　name:         John
+　1:            [object Object]
+　name:         Alice
+　place:        [object Object]
+　number:       23
+　occupiedBy: [object Object]
+　*/
+
+・手書きのJSON形式の典型的な間違い
+　let json = `{
+  　name: "John",                     // 誤り: クォートなしのプロパティ名
+  　"surname": 'Smith',               // 誤り: 値がシングルクォート (ダブルクォート必須)
+  　'isAdmin': false                  // 誤り: キーがシングルクォート (ダブルクォート必須)
+  　"birthday": new Date(2000, 2, 3), // 誤り: "new" は許可されていません, 裸の値のみです。
+  　"friends": [0,1,2,3]              // ここはOKです
+　}`;
+
+・JSONの中身を単なる文字列ではなく、オブジェクトとして変換したい場合は復帰関数を用いる
+　例：let str = '{"title":"Conference","date":"2017-11-30T12:00:00.000Z"}';
+
+　　　let meetup = JSON.parse(str, function(key, value) {
+  　　　if (key == 'date') return new Date(value);
+  　　　return value;
+　　　});
+
+　　　alert( meetup.date.getDate() ); 
+　これはネストされたオブジェクトでも動作する
