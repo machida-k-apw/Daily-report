@@ -1,0 +1,68 @@
+作業内容
+・travelistのタグ抽出作業
+・nextのデザインフレームワークの確認
+
+以下本日の学習内容
+・リトライ処理を用いてHTML要素を読み込めるまで待つ処理に挑戦中
+　現状、動作していない
+
+(function () {
+	window.dataLayer = window.dataLayer || [];
+	/*input要素の抽出*/
+	//すべてのinputタグを取得
+	var inputs = document.querySelectorAll('input');
+	if (inputs.length == 0) {
+		setTimeout(setEventListner(), 1000);
+		dataLayer.push({ 'event': "再帰呼び出し" });
+		return;
+	}
+	dataLayer.push({
+		'event': 'input要素の値',
+		'inputの要素数': inputs.length
+	});
+	//取得した各inputタグオブジェクトに対してeventListenerを追加
+	inputs.forEach(function (input) {
+		input.addEventListener('focus', function () {
+			window.dataLayer.push({
+				//name属性があればname属性の値を、無ければid属性の値を設定
+				'formElementName': input.name || input.id,
+				'event': 'inputElementFocus'
+			})
+		});
+	})
+
+	/*select要素の抽出*/
+
+	//すべてのselectタグを取得
+	var selects = document.querySelectorAll('select');
+	//取得した各selectタグオブジェクトに対してeventListenerを追加
+	selects.forEach(function (select) {
+		select.addEventListener('focus', function () {
+			window.dataLayer.push({
+				'selectElementName': select.dataset.e2eId,
+				'event': 'selectElementFocus'
+			})
+		});
+	})
+
+	/*lavel要素の抽出*/
+	//inputタグでname属性がapplicant_sexであるオブジェクトを取得
+	var labels = document.querySelectorAll('input[name="applicant_sex"]');
+	//取得した各inputタグオブジェクトに対してeventListenerを追加
+	labels.forEach(function (label) {
+		label.addEventListener('click', function () {
+			window.dataLayer.push({
+				'selectElementName': label.name,
+				'event': 'labelElementClick'
+			})
+		})
+	})
+	//スクリプトの発火タイミング確認用
+	window.dataLayer.push({
+		'event': 'スクリプト発火',
+		'inputs': inputs,
+		'selects': selects,
+		'labels': labels
+	});
+}());
+
