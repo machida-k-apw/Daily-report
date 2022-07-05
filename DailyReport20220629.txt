@@ -1,0 +1,330 @@
+作業内容
+・Vueの勉強
+・エラーモーダルのデザイン修正作業
+
+以下学習内容
+Vueガイド
+#はじめに
+##宣言的レンダリング
+・単純なテンプレート構文で宣言的にデータをDOMに描画することができる
+　例：
+　<div id="app">　//ここと
+  　{{ message }}
+　</div>
+
+　var app = new Vue({
+  　el: '#app',　//ここが結びつく
+  　data: {
+   　 message: 'Hello Vue!'
+  　}
+　})
+　
+　これによりHTMLを直接操作することなく、値を制御することができる
+
+・v-bind:属性名="結びつける変数名"を用いて要素の属性をバインディングすることもできる
+　例：spanタグのtitle属性をmessageでバインディングする
+　<div id="app-2">
+  　<span v-bind:title="message">　
+    　Hover your mouse over me for a few seconds
+    　to see my dynamically bound title!
+  　</span>
+　</div>
+
+　var app2 = new Vue({
+  　el: '#app-2',
+  　data: {
+   　 message: 'You loaded this page on ' + new Date().toLocaleString()
+  　}
+　})
+
+##条件分岐とループ
+・v-if="結びつける変数名"で、要素の有無の切り替えをすることができる
+　例：seenの値でspanタグの表示非表示の管理をする
+　<div id="app-3">
+  　<span v-if="seen">Now you see me</span>
+　</div>
+
+　var app3 = new Vue({
+  　el: '#app-3',
+  　data: {
+    　seen: true
+  　}
+　})
+　これはdivタグの表示非表示の制御にも使える
+
+・v-for="単体の変数名 in 結びつける変数名"でforinループができる
+　例：todosの三つのtextがリストとして表示される
+　<div id="app-4">
+  　<ol>
+    　<li v-for="todo in todos">
+      　{{ todo.text }} 
+    　</li>
+  　</ol>
+　</div>
+
+　var app4 = new Vue({
+  　el: '#app-4',
+  　data: {
+    　todos: [
+      　{ text: 'Learn JavaScript' },
+      　{ text: 'Learn Vue' },
+      　{ text: 'Build something awesome' }
+    　]
+  　}
+　})
+
+##ユーザー入力の制御
+・v-on:click="メソッド名"とすることで、ユーザがクリックした際に結びつけたメソッドが発火する
+　例：ボタンを押すとreverseMessageメソッドが発火し、messageの文字列が反転する
+　<div id="app-5">
+  　<p>{{ message }}</p>
+  　<button v-on:click="reverseMessage">Reverse Message</button>
+　</div>
+
+　var app5 = new Vue({
+  　el: '#app-5',
+  　data: {
+    　message: 'Hello Vue.js!'
+  　},
+  　methods: {
+    　reverseMessage: function () {
+     　 this.message = this.message.split('').reverse().join('')
+    　}
+  　}
+　})
+　
+
+・Vueは入力とアプリの状態の双方向バインディングを行うこともできる
+　v-model="変数名"とすることで双方向バインディングを行える
+　例：input内の文字列を変更すると、pタグ内の文字列も変更される
+　<div id="app-6">
+  　<p>{{ message }}</p>
+  　<input v-model="message">
+　</div>
+
+　var app6 = new Vue({
+  　el: '#app-6',
+  　data: {
+    　message: 'Hello Vue!'
+  　}
+　})
+　
+##コンポーネントによる構成
+・Vueには抽象概念としてコンポーネントシステムがある
+　コンポーネントシステムとは、小さく、自己完結的で、（多くの場合）再利用可能なコンポーネントを組み合わせることで、大規模アプリケーションを構築することができるというもの
+
+・コンポーネントは本質的にはあらかじめ定義されたオプションを持つVueインスタンス
+　例：todo-itemと呼ばれる新しいコンポーネントの定義
+　Vue.component('todo-item', {
+  　template: '<li>This is a todo</li>'
+　})
+
+　var app = new Vue(...)
+　
+  例：利用時
+　<ol>
+  　<todo-item></todo-item>
+　</ol>
+
+・Vueでは親コンポーネントから子コンポーネントへデータを渡せる
+　例：todoと呼ばれるプロパティを受け取るtodo-itemコンポーネント
+　Vue.component('todo-item', {
+  　// todo-item コンポーネントはカスタム属性のような "プロパティ" で受け取ります。
+  　// このプロパティは todo と呼ばれます。
+  　props: ['todo'],
+  　template: '<li>{{ todo.text }}</li>'
+　})
+
+　例：v-bindを使ってtodoを渡し、groceryListのtextをリストとして表示
+　<div id="app-7">
+  　<ol>
+    　<!--
+      　各 todo-item の内容を表す todo オブジェクトを与えます。
+      　これにより内容は動的に変化します。
+      　また後述する "key" を各コンポーネントに提供する必要があります。
+    　-->
+    　<todo-item
+      　v-for="item in groceryList"
+      　v-bind:todo="item"
+      　v-bind:key="item.id"
+    　></todo-item>
+  　</ol>
+　</div>
+　
+　Vue.component('todo-item', {
+  　props: ['todo'],
+  　template: '<li>{{ todo.text }}</li>'
+　})
+
+　var app7 = new Vue({
+  　el: '#app-7',
+  　data: {
+    　groceryList: [
+      　{ id: 0, text: 'Vegetables' },
+      　{ id: 1, text: 'Cheese' },
+      　{ id: 2, text: 'Whatever else humans are supposed to eat' }
+    　]
+  　}
+　})
+
+##カスタム要素との関係
+・Vueコンポーネントはサポートされているすべてのブラウザで同じ動作をする
+
+・Vueコンポーネントはクロスコンポーネントデータフローをはじめ、カスタムイベント通信やビルドツールとの統合など、プレーンなカスタム要素内では利用できないいくつかの重要な機能を提供している
+
+#Vueインスタンス
+##Vueインスタンスの作成
+・すべてのVueアプリケーションは、Vue関数で新しいVueインスタンスを作成することによって起動される。
+
+・Vueインスタンスを生成するには、オプションオブジェクトを渡す
+
+・Webアプリケーションは、new Vueで作成されあｔルートVueインスタンス(root Vue instance)で構成され、必要に応じてネストされたツリーや再利用可能なコンポーネントで形成される
+
+・すべてのVueコンポーネントはVueインスタンスで、同じオプションオブジェクトを受け入れる（いくつかのルート特有のオプションを除く）
+
+##データとメソッド
+・Vueインスタンスが作成された際に存在するオブジェクトはすべてリアクティブシステムに追加され、リアクティブとなる
+　リアクティブなオプションのプロパティの値を変更すると、ビューが反応し、新しい値に一致するように更新される
+　そのため、Vueインスタンス生成後に新しいプロパティを追加する場合、リアクティブシステムへは追加されないため、新しいプロパティへ変更してもビューは更新されない
+
+・Object.freeze(obj)を用いると、リアクティブシステムがobjの変更を追跡できなくなり、objを参照している部分が更新されなくなる
+
+・dataプロパティに加えて、Vueインスタンスはいくつかの便利な組み込みプロパティとメソッドを持っており、それらはユーザ定義のプロパティやメソッドと区別するため、頭に$が付けられる
+　例：組み込みプロパティの参照
+　var data = { a: 1 }
+　var vm = new Vue({
+  　el: '#example',
+  　data: data
+　})
+
+　vm.$data === data // => true
+　vm.$el === document.getElementById('example') // => true
+
+　vm.$watch('a', function (newValue, oldValue) {
+   　// このコールバックは `vm.a` の値が変わる時に呼ばれます
+　})
+
+##インスタンスライフサイクルフック
+・各Vueインスタンスは、生成時に一連の初期化を行う
+　例：データの監視のセットアップ(watch)
+  　　テンプレートのコンパイル
+　　　DOMへのインスタンスへのマウント
+　　　データが変化したときのDOMの更新など
+　この初期化の過程で、特定の段階でユーザー自身のコードを追加する、いくつかのライフサイクルフックと呼ばれる関数を実行する
+　例えば、createdフックはインスタンスが生成された後にコードを実行したいときに使う
+　例:インスタンス生成後に"a is: 1"と出力
+　new Vue({
+  　data: {
+    　a: 1
+  　},
+  　created: function () {
+    　// `this` は vm インスタンスを指す
+    　console.log('a is: ' + this.a)
+  　}
+　})
+　この他にもインスタンスのライフサイクルの様々な段階で呼ばれるフックがある
+　例：mounted,updated,destroyedなど
+　すべてのライフサイクルフックは、thisがVueインスタンスを指す形で実行される
+
+・注意：インスタンスプロパティまたはコールバックでアロー関数を使用しない
+　例：crated: () => conosole.log(this.a)
+      vm.$watch('a', newValue => this.myMethod())など
+　アロー関数はthisをもたず、thisは他の変数と同様に見つかるまで親スコープをレキシカルに探索され、しばしばUncaught TypeErrorをはくため
+
+##ライフサイクルダイアグラム
+・https://jp.vuejs.org/v2/guide/instance.htmlにインスタンスライフサイクルの流れの図がある
+　
+#テンプレート構文
+##展開
+・データバインディングの最も基本的な形は、"Mustache"構文(二重中括弧{{ }})を利用したテキスト展開
+  mustacheタグは、対応するオブジェクトのmsgプロパティの値に置き換えられる
+　また、msgプロパティが変更されるとき、それに応じて更新される
+
+・v-onceディレクティブを使用することで、データ変更時の更新は行わず、一度だけ展開することができる
+　ただし、同じノードのあらゆる他のバインディングが影響を受ける
+
+・二重中括弧のmustachesは、データをHTMLではなく、プレーンなテキストとして扱う
+　そのため、実際のHTMLとして出力するためには、v-htmlディレクティブを使用する必要がある
+　例：データ内にHTMLを格納した場合
+　<p>Using mustaches: {{ rawHtml }}</p>
+　<p>Using v-html directive: <span v-html="rawHtml"></span></p>
+　出力結果
+　Using mustaches:<span style="color:red">This should be red.</span>
+  Using v-html directive:This should be red.(本来は赤文字)
+
+・XSS脆弱性を容易に引き起こすため、ウェブサイトで動的に任意のHTMLを描画することは危険
+　例：ユーザーからの入力をHTMLとして描画など
+
+・Mustacheは、HTML属性の内部で使用できない
+　そのときは、v-bindディレクティブを用いる
+
+・Vueではデータバインディング内部でJavaScript式を完全にサポートしている
+　例：ではデータバインディング内部でJavaScript式を実行する
+　{{ number + 1 }}
+
+　{{ ok ? 'YES' : 'NO' }}
+
+　{{ message.split('').reverse().join('') }}
+
+　<div v-bind:id="'list-' + id"></div>
+　ただし、単一の式しか含むことができない
+　例：動作しないJavaScript式
+　<!-- これは文であり、式ではありません: -->
+　{{ var a = 1 }}
+
+　<!-- フロー制御もいずれも動作しません。三項演算子を使用してください -->
+　{{ if (ok) { return message } }}
+　
+・テンプレート式はサンドボックスで、MathやDateといったホワイトリストにあるグローバルオブジェクトだけにアクセスできる
+　テンプレート式内でユーザーが定義したグローバルオブジェクトにアクセスすることはできない
+
+##ディレクティブ
+・ディレクティブはv-から始まる特別な属性
+　ディレクティブの属性値は、単一のJavaScript式を期待する（ただし、v-forは例外）
+　ディレクティブは属性値が変化したときにリアクティブに副作用をDOMに適用する
+
+・ディレクティブの中には"引数"を取るものがあり、これはディレクティブ名の後にコロンで表記する
+
+・バージョン2.6.0から、角括弧で囲むことでJavaScript式をディレクティブの引数に使うこともできる
+　例：角括弧を用いたディレクティブ
+　<a v-bind:[attributeName]="url"> ... </a>
+　このattributeNameはJavaScript式として動的に評価され、その評価結果が引数の最終的な値として使われる
+　この場合、attribureNameが"href"という値をもつ場合、v-bind:hrefと等しくなる
+
+・動的引数の値の制約
+　動的引数は、nullを除くとstringに評価されることが想定されている
+　特殊値nullは明示的にバインディングを削除するのに用いられる
+　その他のstring以外の値は、警告を引き起こす
+
+・動的引数の式の制約
+　動的引数の式には構文上の制約があり、スペースや引用符のような一部の文字は、HTMLの属性名としては不正な文字のため使えない
+　例：不正な文字を利用
+　<a v-bind:['foo' + bar]="value"> ... </a>
+
+・in-DOMテンプレート（HTMLファイルに直接書かれるテンプレート）を使う場合、ブラウザが強制的に属性名を小文字にするため、キー名を大文字にするのは避ける
+
+・修飾子
+　修飾子(Modifier)は、ドットで表記された特別な接尾語で、ディレクティブが特別な方法で束縛されるべきということを示す
+　例えば、.prebent修飾子はv-onディレクティブにイベントがトリガされた際event.preventDefalut()を呼ぶように伝える
+
+・省略記法
+  v-bind省略記法
+　<!-- 完全な構文 -->
+　<a v-bind:href="url"> ... </a>
+
+　<!-- 省略記法 -->
+　<a :href="url"> ... </a>
+
+　<!-- 動的引数の省略記法 (2.6.0 以降) -->
+　<a :[key]="url"> ... </a>
+
+　v-on省略記法
+　<!-- 完全な構文 -->
+　<a v-on:click="doSomething"> ... </a>
+
+　<!-- 省略記法 -->
+　<a @click="doSomething"> ... </a>
+
+　<!-- 動的引数の省略記法 (2.6.0 以降) -->
+　<a @[event]="doSomething"> ... </a>
+
