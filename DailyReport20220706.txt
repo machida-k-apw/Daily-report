@@ -1,0 +1,135 @@
+作業内容
+・モーダルのデザイン修正作業
+・※のサイズの修正
+・JavaScriptチュートリアル
+　開始：関数の高度な機能-再帰とスタック
+　終了：関数の高度な機能-残りのパラメータとスプレッド演算子
+
+以下作業内容の詳細
+## 概要
+- モーダルをxdの通りに修正
+- 以下のファイルの※をxdの通りに修正
+・BookingInfoConfirm.vue
+・ReservationAirDetail.vue
+・ReservationAirPayment.vue
+・ReservationPaymentSelect.vue
+## 変更点
+・モーダルのwidthを800pxに変更
+・※横の数字が全角のものを半角に変更
+・※とテキストの高さが合っていない箇所の修正
+・※のサイズをxdの通りに修正
+
+以下本日の学習内容
+# 再帰とスタック
+## 2つの考え方
+・通常再帰は反復する方法よりも短く書くことができる
+　例：pow関数の場合
+　function pow(x, n) {
+　　return (n == 1) ? x : ( x * pow( x, n - 1 ) );
+　}
+
+## 実行コンテキストとスタック
+・実行コンテキストとは、関数の実行に関する詳細を含む内部のデータ構造
+　現在の制御フロー、現在の変数、thisの値やその他いくつかの内部データを持つ
+　1つの関数呼び出しには、それに関連づけられた実行コンテキストが1つだけある
+
+・再帰ではこの実行コンテキストを再帰呼び出しのたびにスタックしていき、このスタックを用いてプログラムを再開する
+　そのため、再帰ではループよりも使用メモリが増える
+
+## 再帰構造
+### 連結リスト
+・連結リストとはvalueと次の連結リスト要素または末尾の場合はnullを参照するnextプロパティを持つ構造のこと
+例：1,2,3,4という4つのデータが連結リストとなる場合
+let list = { value: 1 };
+list.next = { value: 2 };
+list.next.next = { value: 3 };
+list.next.next.next = { value: 4 };
+list.next.next.next.next = null;
+
+例：上記の連結リストの分割
+let secondList = list.next.next;
+list.next.next = null;
+
+例：上記の分割した連結リストを結合し、元に戻す
+list.next.next = secondList;
+
+例：上記の連結リストから2を取り除く
+list.next = list.next.next; //1->3->4となる
+
+・リストは拡張できる
+  nextに加えてprevプロパティも付け加えることで、前の要素を参照できる
+　リストの最後の要素を参照するtailと呼ばれる変数を追加することができる
+
+# 残りのパラメータとスプレッド演算子
+## 残りのパラメータ'...'
+・関数の引数で残りのパラメータを取得するには、...配列名を用いる
+例：最初の2つの引数とその他の引数を受け取る場合
+function showName(firstName, lastName, ...titles) {
+  alert( firstName + ' ' + lastName ); // Julius Caesar
+
+  // 残りは titles 配列に入る
+  alert( titles[0] ); // Consul
+  alert( titles[1] ); // Imperator
+  alert( titles.length ); // 2
+}
+
+showName("Julius", "Caesar", "Consul", "Imperator");
+
+・残りのパラメータを引数で宣言するときには、最後に書かないとエラーになる
+
+## "arguments"変数
+・インデックスによってすべての引数を含むargumentsという特別なオブジェクトがある。
+例：argumentsを用いた例
+function showName() {
+  alert( arguments.length );
+  alert( arguments[0] );
+  alert( arguments[1] );
+
+  // 反復可能(iterable) 
+  // for(let arg of arguments) alert(arg);
+}
+
+// 表示: 2, Julius, Caesar
+showName("Julius", "Caesar");
+
+// 表示: 1, Ilya, undefined (2つ目の引数がないため)
+showName("Ilya");
+
+・argumentsは配列ではなく、配列ライクで反復可能である点に注意
+
+・アロー関数はargumentsを持たない
+例：アロー関数内でargumentsを呼んだ場合
+function f() {
+  let showArg = () => alert(arguments[0]);
+  showArg();
+}
+
+f(1); // 1
+
+## スプレッド演算子
+・関数呼び出しでスプレッド演算子を用いると、反復可能なオブジェクトへ変換する
+例：スプレッド演算子を用いた場合
+let arr = [3, 5, 1];
+
+alert( Math.max(...arr) ); // 5 (配列を引数のリストに変換する)
+
+・スプレッド演算子は複数渡すこともでき、通常の値を組み合わせることもできる
+　また、配列を結合するためにも利用することができる
+
+・スプレッド演算子を用いて、文字列を文字の配列にすることもできる
+
+## 配列/オブジェクトのコピー
+・スプレッド構文を用いることで、Object.assign()と同じ動作を行うことができる
+例：配列、オブジェクトのコピーの違い
+//オブジェクトの場合
+let obj = { a: 1, b: 2, c: 3 };
+
+let objCopy = { ...obj };
+let objCopy = Object.assign({}, obj)
+
+//配列の場合
+let arr = [1, 2, 3];
+
+let arrCopy = [...arr];
+let arrCopy = Object.assign([], arr)
+
