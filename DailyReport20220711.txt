@@ -1,0 +1,42 @@
+作業内容
+・BookingInfoConfirm.vue,ReservationAirDetail.vue,ReservatinonAirPayment.vue,ReservationPaymentSelect.vueのデザインの修正の修正
+・見積もりトップ画面のデザインの修正
+
+以下作業内容の詳細
+BookingInfoConfirm.vue
+・宿泊数が太字になっていたのを修正
+・お支払いのフォントサイズを24pxから20pxに変更
+・参考販売価格の円が抜けている箇所に円を追加
+・サイト下のボタンのフォントサイズを13pxから14pxへ変更
+・余計なfz-lを削除
+・説明文で12pxになっていない箇所の修正
+・マージンが効いていない箇所をブロック要素に変更し効かせた
+
+ReservationAirDetail.vue
+・h1タグ内の航空券予約詳細のフォントサイズを28pxから24pxへ変更
+・h2タグ内の航空券REFの部分をh2タグから出し、通常の文字フォントに修正
+・飛行機マーク横の見出しを14pxから16pxへ変更
+　また、文字が中央に表示されるようにspanタグ内のcssを変更
+・航空券代合計の円をfont-boldへ変更
+・h1タグにline-height:1を付与
+・ボタンのボーダーカラーが青色になっていたのをグレーに修正
+
+ReservationAirPayment.vue
+・プログレスバーのフォントサイズを14pxから12pxへ修正
+・buttonのテキストを13pxから14pxへ変更
+　また、テキストがボタンの中央に表示されるように調整
+
+ReservationPaymentSelect.vue
+・プログレスバーのフォントのサイズを14pxから12pxへ変更
+・ボタン内のテキストサイズを13pxから14pxへ変更
+　また、テキストが中央に表示されるように調整
+
+EstimateTop.vue
+・h1タグ下にmb-32を追加
+
+EstimateList.vue
+・見積もり一覧のラベルのpaddingの修正
+・見積もり一覧のラベルのテキストのフォントサイズを14pxから13pxへ調整
+・見積もり一覧の出力箇所を18px右に移動
+・marginのサイズを誤って16pxにしていたのを12pxに修正
+・余計に消したw-100perを再度追加
