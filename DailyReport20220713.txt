@@ -1,0 +1,110 @@
+作業内容
+・見積もりトップの微調整
+・※周りのデザインの修正
+・JavaScriptチュートリアル
+　開始：関数の高度な機能-変数スコープ、クロージャ
+　終了：関数の高度な機能-変数スコープ、クロージャ-ネストされた関数
+
+以下学習内容
+# 関数の高度な機能
+## 変数スコープ、クロージャ
+### コードブロック
+・変数がコードブロック{...}の中で宣言された場合は、そのブロックの中でだけ見える
+例：コードブロックの外から変数にアクセスする場合の処理結果
+{
+  // 外には見せる必要のない、ローカル変数で処理をする
+
+  let message = "Hello"; // このコードブロックでだけ見える。
+
+  alert(message); // Hello
+}
+
+ alert(message); // Error: message is not defined
+
+if,for,whileなどの場合も同様
+
+### ネストされた関数
+・関数の内部で作成される関数をネストされた関数と呼ぶ
+例：ネストされた関数getFullName()
+function sayHiBye(firstName, lastName) {
+
+  // 下で使うネストされたヘルパー関数です
+  function getFullName() {
+    return firstName + " " + lastName;
+  }
+
+  alert( "Hello, " + getFullName() );
+  alert( "Bye, " + getFullName() );
+
+}
+
+また、新しいオブジェクトのプロパティまたはその自身の結果として、ネストされた関数を返すことができる
+例:実行ごとに次の数を返すcounter関数
+function makeCounter() {
+  let count = 0;
+
+  return function() {
+    return count++;
+  };
+}
+
+let counter = makeCounter();
+
+alert( counter() ); // 0
+alert( counter() ); // 1
+alert( counter() ); // 2
+
+以下作業内容
+## EstimateTop.vue
+・見積もり一覧のラベルのpaddingの修正
+・見積もり一覧のラベルのテキストのフォントサイズを14pxから13pxへ調整
+・見積もり一覧の出力箇所を18px右に移動
+・h1タグ下にmb-32を追加
+
+## Breadcrumbs.vue
+・パンくず下のマージンを12pxから24pxへ修正
+・パンくずの横のマージンを>の前を8pxから12pxに、後を8pxから10pxへ修正
+
+## EstimateList.vue
+・要素全体の左の余白を32pxから30pxへ変更
+・見積もり番号入力欄の下の余白を12pxから16pxへ変更
+・「担当中の見積もりのみを表示」のチェックボックス下の余白を32pxから36pxへ変更
+・見積もり一覧の左の余白を18pxから20pxへ変更
+・見積もり一覧の見出しにpaddingを割り当てxd通りに修正
+・tableタグのmb-20を削除
+
+## 挙動確認
+以下のボタンのホバー時の挙動の確認
+- 新規作成
+- すべての見積もり
+- 作成済み
+- スター付き
+- 予約作成済み（アーカイブ）
+- ゴミ箱
+- キー中アイテム
+- 検索
+
+以下のボタンを押した際のURLの確認
+- すべての見積もり　　　　　：http://localhost:8082/mypage/estimate?filterType=all
+- 作成済み　　　　　　　　　：http://localhost:8082/mypage/estimate?filterType=created
+- スター付き　　　　　　　　：http://localhost:8082/mypage/estimate?filterType=favorite
+- 予約作成済み（アーカイブ）：http://localhost:8082/mypage/estimate?filterType=archive
+- ゴミ箱　　　　　　　　　　：http://localhost:8082/mypage/estimate?filterType=trash
+- キー中アイテム　　　　　　：http://localhost:8082/mypage/estimate?filterType=keep
+
+## ReservationAirDetail.vue 
+・h1タグしたの余白を16pxから20pxへ変更
+・選択中の区間を予約取り消しボタンをホバーした際に文字が消えるバグの修正
+
+## ReservationAirPayment.vue 
+・dt, ddタグをdivではなくdlタグで囲み直した
+・請求金額締めの部分にline-height:1を割り当てmarginは12のままにした
+・規約同意に戻るボタンにボーダー線が引かれないよう修正
+・丸印の横幅を8pxにすることで、8pxで表現されるように変更
+・丸印の行のテキストが一直線に表示されるように調整
+
+## ReservationPaymentSelect.vue 
+・dt, ddタグをdivではなくdlタグで囲み直した
+・規約同意に戻るボタンにボーダー線が引かれないよう修正
+・丸印の横幅を8pxにすることで、8pxで表現されるように変更
+・丸印の行のテキストが一直線に表示されるように調整
