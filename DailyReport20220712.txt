@@ -1,0 +1,13 @@
+作業内容
+・BookingInfoConfirm.vue,ReservationAirDetail.vue,ReservatinonAirPayment.vue,ReservationPaymentSelect.vueの余白の修正
+
+以下作業内容の詳細
+BookingInfoConfirm.vue
+・余白の修正
+ReservationAirPayment.vue
+・余白の修正
+・ボタンのボーダーカラーの修正
+・ページ上部の余白の修正
+ReeservationPaymentSelect.vue
+・ページ上部の余白の修正
+・余白の修正
