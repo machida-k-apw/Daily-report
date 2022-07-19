@@ -1,0 +1,236 @@
+作業内容
+・見積もりトップの微調整の修正
+・※周りのデザインの再修正
+・404エラーページの作成
+・JavaScriptチュートリアル
+　開始：関数の高度な機能-変数スコープ、クロ-ジャ-レキシカル/語彙環境
+　終了：関数の高度な機能-関数オブジェクト、NFE-lengthプロパティ
+
+以下本日の学習内容
+# 関数の高度な機能
+## 変数スコープ、クロージャ
+### レキシカル/語彙環境
+・クロージャとは、外部変数を記憶し、それらにアクセスできる関数のこと
+　JavaScriptでは一つの例外を除きすべての関数は自然にクロージャになっている
+
+### ガベージコレクション
+・関数は通常呼び出し後はガベージコレクションによりメモリから削除されるが、到達可能なネストされた関数がある場合には、存在し続ける
+例：内部に到達可能なネストされた関数がある場合
+function f() {
+  let value = 123;
+
+  return function() {
+    alert(value);
+  }
+}
+
+let g = f(); // g.[[Environment]] は、対応する f() 呼び出しのレキシカル環境への参照を保持する
+例：メモリからクリアされる場合
+function f() {
+  let value = 123;
+
+  return function() {
+    alert(value);
+  }
+}
+
+let g = f(); // g が生きている間、値はメモリに残り続ける
+
+g = null; // ...今、メモリはクリーンアップされる
+
+例：2つの括弧をとる関数
+function sum(a) {
+
+  return function(b) {
+    return a + b; // 外部のレキシカル環境から "a" を取る
+  };
+
+}
+
+alert( sum(1)(2) ); // 3
+alert( sum(5)(-1) ); // 4
+
+例：外部と内部で同じ変数を持ち、外部の変数を利用する際の落とし穴
+let x = 1;
+
+function func() {
+  console.log(x); // ReferenceError: Cannot access 'x' before initialization
+  let x = 2;
+}
+
+func();
+→エラーが発生
+
+例：配列の組み込み関数filter内でinBetween(a,b)(aとbの間、またはそれらと等しい)を実装
+function inBetween(a, b) {
+  return function(x) {
+    return x >= a && x <= b;
+  };
+}
+
+let arr = [1, 2, 3, 4, 5, 6, 7];
+alert( arr.filter(inBetween(3, 6)) ); // 3,4,5,6
+
+例；配列の組み込み関数filter内でinArray[...](与えられた配列に存在する)を実装
+function inArray(arr) {
+  return function(x) {
+    return arr.includes(x);
+  };
+}
+
+let arr = [1, 2, 3, 4, 5, 6, 7];
+alert( arr.filter(inArray([1, 2, 10])) ); // 1,2
+
+例：sortの冗長をなくす
+let users = [
+  { name: "John", age: 20, surname: "Johnson" },
+  { name: "Pete", age: 18, surname: "Peterson" },
+  { name: "Ann", age: 19, surname: "Hathaway" }
+];
+
+function byField(field) {
+  return (a, b) => a[field] > b[field] ? 1 : -1;
+}
+
+users.sort(byField('name'));
+users.forEach(user => alert(user.name)); // Ann, John, Pete
+
+users.sort(byField('age'));r
+users.forEach(user => alert(user.name)); // Pete, Ann, John
+
+## 古い"var"
+### "var"はブロックスコープを持ちません
+・varはブロック要素内で宣言された変数をグローバルで利用可能
+例：ブロックスコープ内の変数をブロック外で利用
+if (true) {
+  var test = true; // "let" の代わりに "var" を使う
+}
+
+alert(test); // true, if の後も変数を利用可能
+
+例：ループの場合
+for (var i = 0; i < 10; i++) {
+  var one = 1;
+  // ...
+}
+
+alert(i);   // 10, "i" ループ後も見え、グローバル変数
+alert(one); // 1, "one" はループ後も見え、グローバル変数
+
+例：関数の内側にコードブロックがある場合
+function sayHi() {
+  if (true) {
+    var phrase = "Hello";
+  }
+
+  alert(phrase); // works
+}
+
+sayHi();
+alert(phrase); // Error: phrase は未定義
+
+### "var"は再宣言を許容します
+・varはletとは異なり、同一スコープ内で再宣言可能
+
+### "var"はその使用の下で宣言することができます
+・var宣言は、関数の開始時（またはグローバルスクリプト開始時）に処理されるため、変数の利用箇所より下で宣言してもエラーにならない
+例：変数宣言前に利用する
+function sayHi() {
+  phrase = "Hello";
+
+  alert(phrase);//エラーにならない
+
+  var phrase;
+}
+sayHi();
+
+例：到達不可能領域で宣言する場合
+function sayHi() {
+  phrase = "Hello"; // (*)
+
+  if (false) {
+    var phrase;
+  }
+
+  alert(phrase);//エラーにならない
+}
+sayHi();
+
+例：宣言は巻き上げられるが代入はされない
+function sayHi() {
+  alert(phrase); //undefined
+
+  var phrase = "Hello"; 
+}
+
+sayHi();
+
+・IIFE（即時実行関数）
+例：IIFE作成例
+(function() {
+  alert("関数を括弧で囲みます");
+})();
+
+(function() {
+  alert("全体を括弧で囲みます");
+}());
+
+!function() {
+  alert("NOT 演算子は式を開始します");
+}();
+
++function() {
+  alert("単項プラスは式を開始します");
+}();
+
+## グローバルオブジェクト
+・ブラウザではvarで宣言されたグローバル関数や変数は、グローバルオブジェクトのプロパティになる
+　グローバルで見えるようにしたい場合にはプロパティとして直接記述する
+例：currentUser.nameをグローバルオブジェクトにする場合
+　// すべてのスクリプトがアクセスできるよう、現在のユーザ情報をグローバルに作成
+window.currentUser = {
+  name: "John"
+};
+
+// コードのどこかで
+alert(currentUser.name);  // John
+
+// あるいは、ローカル変数に currentUser がある場合には、
+// 明示的に window から取得することも可能です
+alert(window.currentUser.name); // John
+
+### polyfillのための使用
+・グローバルオブジェクトは古いブラウザでは存在しない機能があり、polyfillを作成する際に利用する
+
+## 関数オブジェクト,NFE
+### "name"プロパティ
+例：関数名を"name"プロパティとしてアクセス
+function sayHi() {
+  alert("Hi");
+}
+
+alert(sayHi.name); // sayHi
+
+### "length"プロパティ
+例：関数のパラメータ数を返す
+function f1(a) {}
+function f2(a, b) {}
+function many(a, b, ...more) {}
+
+alert(f1.length); // 1
+alert(f2.length); // 2
+alert(many.length); // 2
+ーーーーーーーーーーーーーーーーーーーーーーーーーーーー
+commit時のに気をつけること
+
+2回目以降のコミットと修正箇所の紐付けは大事
+
+新しいデザイン要素を追加する際の手順
+1,commonに移動
+2,ブランチがmasterでないことを確認
+3,git pull origin master
+4,デザインの追加
+5,npm run build
+6,変更点をコミット
+7,プッシュ
+8,commonをコミット&プッシュ
